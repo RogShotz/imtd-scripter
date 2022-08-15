@@ -5,7 +5,7 @@ import time
 import random
 import my_logging as log
 
-pyauto_pause = 0.01
+pyauto_pause = 0.05
 
 pyautogui.FAILSAFE = True
 pyautogui.PAUSE = pyauto_pause
@@ -82,9 +82,11 @@ def loadout():
 
     if loadout_button_location:
         click_obf(loadout_button_location)
-        load_loadout_button_location = pyautogui.locateOnScreen('load_loadout_button.png', confidence=0.8)
+        load_loadout_button_location = pyautogui.locateOnScreen('load_loadout_button.png', confidence=0.7)
         if load_loadout_button_location: # limited to first instace i.e. Towers1
             click_obf(load_loadout_button_location)
+        else:
+            print("ERR: load_loadout_button not found")
     else:
         print("ERR: loadout_button not found")
 
@@ -99,13 +101,22 @@ def upgrade(pos: int): #TODO: make better with vars and image scraping
         click_obf_xy(1170, 942)
     pyautogui.press('esc')
 
-def check_ad():
-    if not pyautogui.pixelMatchesColor(1890, 950, (0, 0, 0)): # finds if pixel at location is black
-        print("ad detected")
-        click_obf_xy(1890, 950)
-        pyautogui.press('esc')
+def check_ad(prev_val: bool):
+    pixel_match = pyautogui.pixelMatchesColor(1890, 950, (0, 0, 0)) # finds if pixel at location is black
+    if not prev_val:
+        if not pixel_match: # if not black
+            print("ad detected")
+            click_obf_xy(1890, 950)
+            pyautogui.press('esc')
+            return True
+        else:
+            return False
     else:
-        print("ad not detected")
+        if pixel_match: # if black
+            print("ad no longer detected")
+            return False
+        else:
+            return True
 
 def autocast():
     riches_spell_location = pyautogui.locateOnScreen('riches_spell.png', confidence=0.8)
@@ -124,13 +135,22 @@ def autocast():
     
     if time_spell_location:
         click_obf(time_spell_location)
+
+def boss_rush():
+    boss_rush_button_location = pyautogui.locateOnScreen('boss_rush_button.png', confidence=0.8)
+    
+    if boss_rush_button_location:
+        click_obf(boss_rush_button_location)
+        print("Boss Rush Enabled")
     
 
 time.sleep(3)
-play(True) #start off running
-play(True) #needs two, one to refocus, on to actually start
+boss_rush() # ensures boss rush is on
+boss_rush() # needs two, one to refocus, on to actually start
+loadout()
+play(True) # start off running
 
-loop_count = 0
+ad_status = False
 while True:
     if dev_mode:
         print(pyautogui.position())
@@ -141,11 +161,10 @@ while True:
             print(f'Prestige Count Up to: {log.log_get("prestiges")}')
             time.sleep(10)
             loadout()
+            boss_rush()
             play(True)
         upgrade(0)
         autocast()
-        if loop_count % 60 == 0: # check every 60 ticks
-            check_ad()
+        ad_status = check_ad(ad_status)
         time.sleep(1)
-        loop_count += 1
 
