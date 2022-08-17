@@ -5,6 +5,7 @@ import time
 import random
 import my_logging as log
 import threading
+import text
 
 pyauto_pause = 0.05
 
@@ -120,39 +121,55 @@ def upgrade(pos: int): #TODO: make better with vars and image scraping
         click_obf_xy(1040, y=355)
         click_obf_xy(1170, 942)
 
+    if pos == 8 or pos == 0:
+        click_obf_xy(1040, y=520)
+        click_obf_xy(1170, 942)
+
     pyautogui.press('esc')
 
 def check_ad(prev_val: bool):
     pixel_match = pyautogui.pixelMatchesColor(1890, 950, (0, 0, 0)) # finds if pixel at location is black
     if not prev_val:
         if not pixel_match: # if not black
-            print("ad detected")
+            #print("ad detected")
             click_obf_xy(1890, 950)
             pyautogui.press('esc')
+            log.log_add("ads")
+            #print(log.log_get("ads"))
             return True
         else:
             return False
     else:
         if pixel_match: # if black
-            print("ad no longer detected")
+            #print("ad no longer detected")
             return False
         else:
             return True
 
-def autocast():
+def autocast(restrict_boss: bool):
     riches_spell_location = pyautogui.locateOnScreen('riches_spell.png', confidence=0.8)
     power_spell_location = pyautogui.locateOnScreen('power_spell.png', confidence=0.8)
     mastership_spell_location = pyautogui.locateOnScreen('mastership_spell.png', confidence=0.8)
     time_spell_location = pyautogui.locateOnScreen('time_spell.png', confidence=0.8)
 
     if riches_spell_location:
-        click_obf(riches_spell_location)
+        if restrict_boss:
+            if text.wave_count % 5 == 0:
+                click_obf(riches_spell_location)
+                #print("Boss Spell Casted")
+        else:
+            click_obf(riches_spell_location)
     
     if power_spell_location:
         click_obf(power_spell_location)
     
     if mastership_spell_location:
-        click_obf(mastership_spell_location)
+        if restrict_boss:
+            if text.wave_count % 5 == 0:
+                click_obf(mastership_spell_location)
+                #print("Boss Spell Casted")
+        else:
+            click_obf(riches_spell_location)
     
     if time_spell_location:
         click_obf(time_spell_location)
@@ -163,6 +180,18 @@ def boss_rush():
     if boss_rush_button_location:
         click_obf(boss_rush_button_location)
         print("Boss Rush Enabled")
+
+def mob_rush():
+    if text.wave_count < 50 and text.wave_count > -1:
+        mob_button_location = pyautogui.locateOnScreen('mob_button.png', confidence=0.8)
+        if mob_button_location:
+            click_obf(mob_button_location)
+            mob_begin_button_location = pyautogui.locateOnScreen('mob_begin_button.png', confidence=0.8)
+            if mob_begin_button_location:
+                click_obf(mob_begin_button_location)
+                print(f"MOB RUSH @ WAVE {text.wave_count}")
+        
+
     
 
 time.sleep(3)
@@ -173,8 +202,11 @@ play(True) # start off running
 
 ad_status = False
 
-x = threading.Thread(target=auto_prestige)
-x.start()
+prestige_thread = threading.Thread(target=auto_prestige)
+prestige_thread.start()
+
+wave_thread = threading.Thread(target=text.find_wave)
+wave_thread.start()
 
 while True:
     with lock:
@@ -182,9 +214,10 @@ while True:
         if dev_mode:
             print(pyautogui.position())
         else:
-            upgrade(5)
-            autocast()
+            upgrade(8)
+            autocast(True)
             ad_status = check_ad(ad_status)
+            mob_rush()
     time.sleep(1)
 
 
