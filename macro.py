@@ -4,6 +4,7 @@ import pyautogui
 import time
 import random
 import my_logging as log
+import threading
 
 pyauto_pause = 0.05
 
@@ -12,6 +13,7 @@ pyautogui.PAUSE = pyauto_pause
 
 debug_mode = False
 dev_mode = False
+lock = threading.Lock() # False means no one has GUI input
 
 #click obfuscation, adds a random value +-3 pixels in any direction
 def click_obf(location: object):
@@ -19,7 +21,7 @@ def click_obf(location: object):
     x_offset = random.randint(-3,3)
     y_offset = random.randint(-3,3)
     #print(f'loc click at: {point.x+x_offset}, {point.y+y_offset}')
-    pyautogui.moveTo(point.x+x_offset, point.y+y_offset, 1, pyautogui.easeInQuad)
+    pyautogui.moveTo(point.x+x_offset, point.y+y_offset, .5, pyautogui.easeInQuad)
     pyautogui.click(point.x+x_offset, point.y+y_offset)
     log.log_add("clicks")
 
@@ -27,42 +29,52 @@ def click_obf_xy(x: int, y:int):
     x_offset = random.randint(-3,3)
     y_offset = random.randint(-3,3)
     #print(f'xy click at: {x+x_offset}, {y+y_offset}')
-    pyautogui.moveTo(x+x_offset, y+y_offset, 1, pyautogui.easeOutQuad)
+    pyautogui.moveTo(x+x_offset, y+y_offset, .5, pyautogui.easeOutQuad)
     pyautogui.click(x+x_offset, y+y_offset)
     log.log_add("clicks")
     
-def auto_prestige():
-    defeat_found = pyautogui.locateOnScreen('Defeat_Cut.png', confidence=0.8)
-    prestige_location = pyautogui.locateOnScreen('prestige_cut.png', confidence=0.8)
+def auto_prestige(): # running on seperate thread
+    global control_stick 
 
-    if defeat_found:
-        if prestige_location:
-            click_obf(prestige_location)
-            prestige_nested_button = pyautogui.locateOnScreen('prestige_button.png', confidence=0.8)
-            if not prestige_nested_button:
-                print("Defeat Detected, but no Prestige Nested Button")
-                print("Attempting to scroll prestige menu")
-                nested_map_selection_button_location = pyautogui.locateOnScreen('nested_map_selection_button.png', confidence=0.8)
-                if nested_map_selection_button_location:
-                    click_obf(nested_map_selection_button_location) # click ensures were in the menu
-                    pyautogui.PAUSE = 0
-                    for i in range(50):
-                        pyautogui.scroll(-10)
-                        time.sleep(.01)
-                    pyautogui.PAUSE = pyauto_pause
+    while True:
+        defeat_found = pyautogui.locateOnScreen('Defeat_Cut.png', confidence=0.8)
+        prestige_location = pyautogui.locateOnScreen('prestige_cut.png', confidence=0.8)
+
+        if defeat_found:
+            global lock
+            with lock:
+                if prestige_location:
+                    click_obf(prestige_location)
+                    prestige_nested_button = pyautogui.locateOnScreen('prestige_button.png', confidence=0.8)
+                    if not prestige_nested_button:
+                        print("Defeat Detected, but no Prestige Nested Button")
+                        print("Attempting to scroll prestige menu")
+                        nested_map_selection_button_location = pyautogui.locateOnScreen('nested_map_selection_button.png', confidence=0.8)
+                        if nested_map_selection_button_location:
+                            click_obf(nested_map_selection_button_location) # click ensures were in the menu
+                            pyautogui.PAUSE = 0
+                            for i in range(50):
+                                pyautogui.scroll(-10)
+                                time.sleep(.01)
+                            pyautogui.PAUSE = pyauto_pause
+                        else:
+                            print("ERR: nested_map_selection_button_location was not found")
+                    prestige_nested_button = pyautogui.locateOnScreen('prestige_button.png', confidence=0.8)
+                    if prestige_nested_button:
+                        click_obf(prestige_nested_button)
+                        log.log_add("prestiges")
+                        print(f'Prestige Count Up to: {log.log_get("prestiges")}')
+                        time.sleep(10)
+                        loadout()
+                        boss_rush()
+                        play(True)
+                    else:
+                        print("ERR: prestige_nested_button was not")
                 else:
-                    print("ERR: nested_map_selection_button_location was not found")
-            prestige_nested_button = pyautogui.locateOnScreen('prestige_button.png', confidence=0.8)
-            if prestige_nested_button:
-                click_obf(prestige_nested_button)
-                return True
-            else:
-                print("ERR: prestige_nested_button was not")
-        else:
-            print("ERR: Defeat Detected, but no Prestige Button")
+                    print("ERR: Defeat Detected, but no Prestige Button")
+        time.sleep(.1)
 
     #print(f'defeat_found = {defeat_found}')
-    return False
 
 def play(play: bool):
     play_location = pyautogui.locateOnScreen('play_button.png', confidence=0.8)
@@ -99,6 +111,15 @@ def upgrade(pos: int): #TODO: make better with vars and image scraping
     if pos == 3 or pos == 0:
         click_obf_xy(878, 298)
         click_obf_xy(1170, 942)
+
+    if pos == 4 or pos == 0:
+        click_obf_xy(880, 350)
+        click_obf_xy(1170, 942)
+    
+    if pos == 5 or pos == 0:
+        click_obf_xy(1040, y=355)
+        click_obf_xy(1170, 942)
+
     pyautogui.press('esc')
 
 def check_ad(prev_val: bool):
@@ -151,20 +172,19 @@ loadout()
 play(True) # start off running
 
 ad_status = False
+
+x = threading.Thread(target=auto_prestige)
+x.start()
+
 while True:
-    if dev_mode:
-        print(pyautogui.position())
-        time.sleep(.1)
-    else:
-        if auto_prestige():
-            log.log_add("prestiges")
-            print(f'Prestige Count Up to: {log.log_get("prestiges")}')
-            time.sleep(10)
-            loadout()
-            boss_rush()
-            play(True)
-        upgrade(0)
-        autocast()
-        ad_status = check_ad(ad_status)
-        time.sleep(1)
+    with lock:
+        control_stick = True
+        if dev_mode:
+            print(pyautogui.position())
+        else:
+            upgrade(5)
+            autocast()
+            ad_status = check_ad(ad_status)
+    time.sleep(1)
+
 
