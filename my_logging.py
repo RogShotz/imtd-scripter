@@ -15,4 +15,4 @@ def log_get(name: str):
     with open(r"stats.json", 'r') as f:
         stats = json.load(f)
 
-    return stats["total"][name]
+    return int(stats["total"][name])

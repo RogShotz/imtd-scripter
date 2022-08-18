@@ -57,7 +57,7 @@ def find_wave(): # meant to run in a thread that updates every 5 seconds
                         wave_count = int(wave)
             except:
                 pass
+            time.sleep(5)
 
-        time.sleep(5)
         wave_count = -1
     return
