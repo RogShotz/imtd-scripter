@@ -8,7 +8,8 @@ import my_logging
 
 global wave_count
 
-def find_text(left: int, top: int , right: int, bottom: int):
+
+def find_text(left: int, top: int, right: int, bottom: int):
     # Mention the installed location of Tesseract-OCR in your system
     pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
 
@@ -20,7 +21,7 @@ def find_text(left: int, top: int , right: int, bottom: int):
     texts = pytesseract.image_to_string(img)
 
     #cv2.imshow("Output", img)
-    #cv2.waitKey(0)
+    # cv2.waitKey(0)
     return texts
 
 
@@ -35,24 +36,28 @@ def draw_boxes_on_character(img):
         y = int(box[2])
         x2 = int(box[3])
         y2 = int(box[4])
-        cv2.rectangle(img, (x, img_height - y), (x2, img_height - y2), (0, 255, 0), 1)
+        cv2.rectangle(img, (x, img_height - y),
+                      (x2, img_height - y2), (0, 255, 0), 1)
 
-        cv2.putText(img, character, (x, img_height -y2), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 1)
-        
+        cv2.putText(img, character, (x, img_height - y2),
+                    cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 1)
+
     return img
 
-def find_wave(): # meant to run in a thread that updates every 5 seconds
+
+def find_wave():  # meant to run in a thread that updates every 5 seconds
     global wave_count
     wave_count = -1
     while True:
         current_prestige = my_logging.log_get("prestiges")
         while current_prestige == my_logging.log_get("prestiges"):
-            text = find_text(0,20, 200, 100)
+            text = find_text(0, 20, 200, 100)
             start = text.lower().find("wave")
             end = text.lower().find("\n")
             try:
-                wave = int(text[start+5:end]) # +4 to compensate for wave and /s
-                if wave > wave_count: # if it got actual input
+                # +4 to compensate for wave and /s
+                wave = int(text[start+5:end])
+                if wave > wave_count:  # if it got actual input
                     if my_logging.log_get("prestiges"):
                         wave_count = int(wave)
             except:
