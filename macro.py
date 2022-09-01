@@ -155,11 +155,13 @@ def loadout():
         print("ERR: loadout_button not found")
 
 
-def upgrade(pos_list: list):  # TODO: Proof this
-    #pix = pyautogui.pixel(1170, 942)
+def upgrade(pos: int):
+    #def upgrade(pos_list: list):  # TODO: Proof this
+    '''
+    pix = pyautogui.pixel(1170, 942)
     global monster_position
     if monster_position is empty:  # TODO: empty?
-        map_pos_init()
+        #map_pos_init()
 
     for pos in pos_list:
         click_obf_xy(monster_position[pos])
@@ -170,7 +172,51 @@ def upgrade(pos_list: list):  # TODO: Proof this
             click_obf_xy(1170, 942)
 
         pyautogui.press('esc')
+    '''
+    #1st pos
+    if pos == 1 or pos ==  0:
+        click_obf_xy(879, 185)
+        time.sleep(.1)
+        upgrade_button_pixel = pyautogui.pixelMatchesColor(1170, 942, (143, 204, 84))
+        if upgrade_button_pixel:
+            click_obf_xy(1170, 942)
+    #3rd pos
+    if pos == 3 or pos == 0:
+        click_obf_xy(878, 300)
+        time.sleep(.1)
+        upgrade_button_pixel = pyautogui.pixelMatchesColor(1170, 942, (143, 204, 84))
+        if upgrade_button_pixel:
+            click_obf_xy(1170, 942)
 
+    if pos == 4 or pos == 0:
+        click_obf_xy(880, 350)
+        time.sleep(.1)
+        upgrade_button_pixel = pyautogui.pixelMatchesColor(1170, 942, (143, 204, 84))
+        if upgrade_button_pixel:
+            click_obf_xy(1170, 942)
+    
+    if pos == 5 or pos == 0:
+        click_obf_xy(1040, 355)
+        time.sleep(.1)
+        upgrade_button_pixel = pyautogui.pixelMatchesColor(1170, 942, (143, 204, 84))
+        if upgrade_button_pixel:
+            click_obf_xy(1170, 942)
+
+    if pos == 8 or pos == 0:
+        click_obf_xy(1040, 520)
+        time.sleep(.1)
+        upgrade_button_pixel = pyautogui.pixelMatchesColor(1170, 942, (143, 204, 84))
+        if upgrade_button_pixel:
+            click_obf_xy(1170, 942)
+
+    if pos == 10 or pos == 0:
+        click_obf_xy(1040, 635)
+        time.sleep(.1)
+        upgrade_button_pixel = pyautogui.pixelMatchesColor(1170, 942, (143, 204, 84))
+        if upgrade_button_pixel:
+            click_obf_xy(1170, 942)
+    
+    pyautogui.press('esc')
 
 def check_ad():
     while True:
@@ -180,6 +226,7 @@ def check_ad():
             1890, 950, (128, 0, 0))  # finds if pixel at location is black
         if not pixel_match and not pixel_match_red:  # if not black
             #print("ad detected")
+            time.sleep(.1)
             click_obf_xy(1890, 950)
             pyautogui.press('esc')
             log.log_add("ads")
@@ -230,9 +277,14 @@ def boss_rush():
     if boss_rush_button_location:
         click_obf(boss_rush_button_location)
         print("Boss Rush Enabled")
+        # Point
+        mini_boss_rush_button_location = pyautogui.locateCenterOnScreen('mini_boss_rush_button.png', confidence=0.8)
+        if mini_boss_rush_button_location:
+            click_obf_xy(mini_boss_rush_button_location.x+140, mini_boss_rush_button_location.y)
 
 
 def mob_rush():
+    print(text.wave_count)
     if text.wave_count < 100 and text.wave_count > 0:
         mob_button_location = pyautogui.locateOnScreen(
             'mob_button.png', confidence=0.8)
@@ -251,10 +303,11 @@ time.sleep(3)
 while dev_mode:
     print(pyautogui.position())
 
+macro_init()
 
 while True:
     with lock:
-        # upgrade(8)
+        upgrade(8)
         # upgrade(10)
         autocast(True)
         mob_rush()
