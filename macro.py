@@ -7,7 +7,7 @@ import random
 import my_logging as log
 import threading
 import text
-
+from queue import Queue
 
 # consts
 pyauto_pause = 0.1
@@ -19,8 +19,8 @@ debug_mode = False
 dev_mode = False
 
 # code related vars
-lock = threading.Lock()  # False means no one has GUI input
 monster_position = []
+fncqueue = Queue(maxsize = 0)
 
 
 # INTERNAL FNC AREA
@@ -54,14 +54,12 @@ def macro_init():
     play(True)   # start off running
 
     # thread bootup
-    prestige_thread = threading.Thread(target=auto_prestige)
-    prestige_thread.start()
+    detector_thread = threading.Thread(target=detector)
+    detector_thread.start()
 
     wave_thread = threading.Thread(target=text.find_wave)
     wave_thread.start()
 
-    ad_thread = threading.Thread(target=check_ad)
-    ad_thread.start()
 
 
 def map_pos_init():  # TODO: Proof this
@@ -71,55 +69,71 @@ def map_pos_init():  # TODO: Proof this
     monster_position = pyautogui.locateAllOnScreen(
         'BUTTON.PNG', confidence=0.8)
 
+# THREADING SECTION FOR DETECTION
+
+def detector():
+    while True:
+        global fncqueue
+        defeat_found = pyautogui.locateOnScreen(
+            'Defeat_Cut.png', confidence=0.8)
+        
+        if(defeat_found):
+            fncqueue.put(auto_prestige)
+        
+        im = pyautogui.screenshot(region=(1850, 900, 100, 100))
+        new_indicator = pyautogui.locate("new_indicator.png", im, confidence=0.4)
+
+        if(new_indicator):
+            print("ad detection")
+            fncqueue.put(check_ad)
+        
+        while not fncqueue.empty():
+            time.sleep(1)
+        time.sleep(1)
+        
 
 # GAME MACRO AREA
 
 def auto_prestige():  # running on seperate thread
-    while True:
-        defeat_found = pyautogui.locateOnScreen(
-            'Defeat_Cut.png', confidence=0.8)
-        prestige_location = pyautogui.locateOnScreen(
-            'prestige_cut.png', confidence=0.8)
-
-        if defeat_found:
-            global lock
-            with lock:
-                if prestige_location:
-                    click_obf(prestige_location)
-                    prestige_nested_button = pyautogui.locateOnScreen(
-                        'prestige_button.png', confidence=0.8)
-                    if not prestige_nested_button:
-                        print("Defeat Detected, but no Prestige Nested Button")
-                        print("Attempting to scroll prestige menu")
-                        nested_map_selection_button_location = pyautogui.locateOnScreen(
-                            'nested_map_selection_button.png', confidence=0.8)
-                        if nested_map_selection_button_location:
-                            # click ensures were in the menu
-                            click_obf(nested_map_selection_button_location)
-                            pyautogui.PAUSE = 0
-                            for i in range(50):
-                                pyautogui.scroll(-10)
-                                time.sleep(.01)
-                            pyautogui.PAUSE = pyauto_pause
-                        else:
-                            print(
-                                "ERR: nested_map_selection_button_location was not found")
-                    prestige_nested_button = pyautogui.locateOnScreen(
-                        'prestige_button.png', confidence=0.8)
-                    if prestige_nested_button:
-                        click_obf(prestige_nested_button)
-                        log.log_add("prestiges")
-                        print(
-                            f'Prestige Count Up to: {log.log_get("prestiges")}')
-                        time.sleep(10)
-                        loadout()
-                        boss_rush()
-                        play(True)
-                    else:
-                        print("ERR: prestige_nested_button was not")
-                else:
-                    print("ERR: Defeat Detected, but no Prestige Button")
-        time.sleep(1)
+    prestige_location = pyautogui.locateOnScreen(
+        'prestige_cut.png', confidence=0.8)
+        
+    if prestige_location:
+        click_obf(prestige_location)
+        prestige_nested_button = pyautogui.locateOnScreen(
+            'prestige_button.png', confidence=0.8)
+        if not prestige_nested_button:
+            print("Defeat Detected, but no Prestige Nested Button")
+            print("Attempting to scroll prestige menu")
+            nested_map_selection_button_location = pyautogui.locateOnScreen(
+                'nested_map_selection_button.png', confidence=0.8)
+            if nested_map_selection_button_location:
+                # click ensures were in the menu
+                click_obf(nested_map_selection_button_location)
+                pyautogui.PAUSE = 0
+                for i in range(50):
+                    pyautogui.scroll(-10)
+                    time.sleep(.01)
+                pyautogui.PAUSE = pyauto_pause
+            else:
+                print(
+                    "ERR: nested_map_selection_button_location was not found")
+        prestige_nested_button = pyautogui.locateOnScreen(
+            'prestige_button.png', confidence=0.8)
+        if prestige_nested_button:
+            click_obf(prestige_nested_button)
+            log.log_add("prestiges")
+            print(
+                f'Prestige Count Up to: {log.log_get("prestiges")}')
+            time.sleep(10)
+            loadout()
+            boss_rush()
+            play(True)
+        else:
+            print("ERR: prestige_nested_button was not")
+    else:
+                print("ERR: Defeat Detected, but no Prestige Button")
+    time.sleep(1)
 
 
 def play(play: bool):
@@ -142,8 +156,6 @@ def loadout():
         'loadout_button.png', confidence=0.8)
 
     if loadout_button_location:
-        global lock
-        with lock:
             click_obf(loadout_button_location)
             load_loadout_button_location = pyautogui.locateOnScreen(
                 'load_loadout_button.png', confidence=0.7)
@@ -220,24 +232,10 @@ def upgrade(pos: int):
     pyautogui.press('esc')
 
 def check_ad():
-    while True:
-
-        if not lock:
-            pixel_match = pyautogui.pixelMatchesColor(
-            1890, 950, (0, 0, 0))  # finds if pixel at location is black
-            pixel_match_red = pyautogui.pixelMatchesColor(
-            1890, 950, (128, 0, 0))  # finds if pixel at location is black
-            if not pixel_match and not pixel_match_red:  # if not black
-                #print("ad detected")
-                click_obf_xy(1890, 950)
-                time.sleep(.15)
-                pyautogui.press('esc')
-                log.log_add("ads")
-                # print(log.log_get("ads"))
-                # sleep this thread for 4 minutes, TODO: find how often ads occur even at 2x ad speed, put that here
-                time.sleep(240)
-            # allowed to be inneficient, doesnt need to occur very often
-            time.sleep(5)
+    click_obf_xy(1890, 950)
+    time.sleep(.15)
+    pyautogui.press('esc')
+    log.log_add("ads")
 
 
 def autocast(restrict_boss: bool):
@@ -275,7 +273,7 @@ def autocast(restrict_boss: bool):
 
 def boss_rush():
     boss_rush_button_location = pyautogui.locateOnScreen(
-        'boss_rush_button.png', confidence=0.8)
+        'boss_rush_button.png', confidence=0.9)
 
     if boss_rush_button_location:
         click_obf(boss_rush_button_location)
@@ -308,9 +306,12 @@ while dev_mode:
 macro_init()
 
 while True:
-    with lock:
-        upgrade(8)
-        #upgrade(10)
-        autocast(True)
-        mob_rush()
-    time.sleep(1)
+    while(not fncqueue.empty()):
+        func = fncqueue.get()
+        func()
+    
+    upgrade(8)
+    #upgrade(10)
+    autocast(True)
+    mob_rush()
+    time.sleep(2)

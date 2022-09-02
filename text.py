@@ -24,6 +24,12 @@ def find_text(left: int, top: int, right: int, bottom: int):
     # cv2.waitKey(0)
     return texts
 
+def test():
+    im = pyautogui.screenshot(region=(1850, 900, 100, 100))
+    im = cv2.cvtColor(np.array(im), cv2.COLOR_BGR2RGB)
+    cv2.imshow("Output", im)
+    cv2.waitKey(0)
+
 
 def draw_boxes_on_character(img):
     img_width = img.shape[1]
@@ -66,3 +72,5 @@ def find_wave():  # meant to run in a thread that updates every 5 seconds
 
         wave_count = -1
     return
+
+#test()
