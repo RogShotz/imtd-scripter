@@ -216,25 +216,28 @@ def upgrade(pos: int):
         if upgrade_button_pixel:
             click_obf_xy(1170, 942)
     
+    time.sleep(.1)
     pyautogui.press('esc')
 
 def check_ad():
     while True:
-        pixel_match = pyautogui.pixelMatchesColor(
+
+        if not lock:
+            pixel_match = pyautogui.pixelMatchesColor(
             1890, 950, (0, 0, 0))  # finds if pixel at location is black
-        pixel_match_red = pyautogui.pixelMatchesColor(
+            pixel_match_red = pyautogui.pixelMatchesColor(
             1890, 950, (128, 0, 0))  # finds if pixel at location is black
-        if not pixel_match and not pixel_match_red:  # if not black
-            #print("ad detected")
-            time.sleep(.1)
-            click_obf_xy(1890, 950)
-            pyautogui.press('esc')
-            log.log_add("ads")
-            # print(log.log_get("ads"))
-            # sleep this thread for 4 minutes, TODO: find how often ads occur even at 2x ad speed, put that here
-            time.sleep(240)
-        # allowed to be inneficient, doesnt need to occur very often
-        time.sleep(5)
+            if not pixel_match and not pixel_match_red:  # if not black
+                #print("ad detected")
+                click_obf_xy(1890, 950)
+                time.sleep(.15)
+                pyautogui.press('esc')
+                log.log_add("ads")
+                # print(log.log_get("ads"))
+                # sleep this thread for 4 minutes, TODO: find how often ads occur even at 2x ad speed, put that here
+                time.sleep(240)
+            # allowed to be inneficient, doesnt need to occur very often
+            time.sleep(5)
 
 
 def autocast(restrict_boss: bool):
@@ -284,8 +287,7 @@ def boss_rush():
 
 
 def mob_rush():
-    print(text.wave_count)
-    if text.wave_count < 100 and text.wave_count > 0:
+    if text.wave_count < 200 and text.wave_count > 0:
         mob_button_location = pyautogui.locateOnScreen(
             'mob_button.png', confidence=0.8)
         if mob_button_location:
@@ -308,7 +310,7 @@ macro_init()
 while True:
     with lock:
         upgrade(8)
-        # upgrade(10)
+        #upgrade(10)
         autocast(True)
         mob_rush()
     time.sleep(1)
