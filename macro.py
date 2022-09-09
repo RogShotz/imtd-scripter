@@ -71,6 +71,8 @@ def map_pos_init():  # TODO: Proof this
 
 # THREADING SECTION FOR DETECTION
 
+# Used to detect shit and report back for a aynchronous queue that will be processed
+# NO USAGE OF KEY STROKES OR MOUSE IN THIS AREA
 def detector():
     while True:
         global fncqueue
@@ -158,7 +160,7 @@ def loadout():
     if loadout_button_location:
             click_obf(loadout_button_location)
             load_loadout_button_location = pyautogui.locateOnScreen(
-                'load_loadout_button.png', confidence=0.7)
+                'load_loadout_button.png', confidence=0.6)
             if load_loadout_button_location:  # limited to first instace i.e. Towers1
                 click_obf(load_loadout_button_location)
             else:
@@ -188,48 +190,45 @@ def upgrade(pos: int):
     #1st pos
     if pos == 1 or pos ==  0:
         click_obf_xy(879, 185)
-        time.sleep(.1)
-        upgrade_button_pixel = pyautogui.pixelMatchesColor(1170, 942, (143, 204, 84))
-        if upgrade_button_pixel:
-            click_obf_xy(1170, 942)
+        
     #3rd pos
     if pos == 3 or pos == 0:
         click_obf_xy(878, 300)
-        time.sleep(.1)
-        upgrade_button_pixel = pyautogui.pixelMatchesColor(1170, 942, (143, 204, 84))
-        if upgrade_button_pixel:
-            click_obf_xy(1170, 942)
 
     if pos == 4 or pos == 0:
         click_obf_xy(880, 350)
-        time.sleep(.1)
-        upgrade_button_pixel = pyautogui.pixelMatchesColor(1170, 942, (143, 204, 84))
-        if upgrade_button_pixel:
-            click_obf_xy(1170, 942)
     
     if pos == 5 or pos == 0:
         click_obf_xy(1040, 355)
-        time.sleep(.1)
-        upgrade_button_pixel = pyautogui.pixelMatchesColor(1170, 942, (143, 204, 84))
-        if upgrade_button_pixel:
-            click_obf_xy(1170, 942)
+
+    if pos == 6 or pos == 0:
+        click_obf_xy(880, 470)
+
+    if pos == 7 or pos == 0:
+        click_obf_xy(1040, 470)
 
     if pos == 8 or pos == 0:
         click_obf_xy(1040, 520)
-        time.sleep(.1)
-        upgrade_button_pixel = pyautogui.pixelMatchesColor(1170, 942, (143, 204, 84))
-        if upgrade_button_pixel:
-            click_obf_xy(1170, 942)
 
     if pos == 10 or pos == 0:
         click_obf_xy(1040, 635)
-        time.sleep(.1)
-        upgrade_button_pixel = pyautogui.pixelMatchesColor(1170, 942, (143, 204, 84))
-        if upgrade_button_pixel:
-            click_obf_xy(1170, 942)
+
+    time.sleep(.2)
+    upgrade_button_pixel = pyautogui.pixelMatchesColor(1170, 942, (143, 204, 84))
+    if upgrade_button_pixel:
+        click_obf_xy(1170, 942)
+        time.sleep(.15)
     
-    time.sleep(.1)
     pyautogui.press('esc')
+
+    time.sleep(.1)
+
+    exit_game_button_location = pyautogui.locateOnScreen(
+        'exit_game_button.png', confidence=0.8)
+
+    if exit_game_button_location:
+        pyautogui.press('esc')
+    
 
 def check_ad():
     click_obf_xy(1890, 950)
@@ -285,7 +284,7 @@ def boss_rush():
 
 
 def mob_rush():
-    if text.wave_count < 200 and text.wave_count > 0:
+    if text.wave_count < 300 and text.wave_count > 0:
         mob_button_location = pyautogui.locateOnScreen(
             'mob_button.png', confidence=0.8)
         if mob_button_location:
@@ -295,6 +294,13 @@ def mob_rush():
             if mob_begin_button_location:
                 click_obf(mob_begin_button_location)
                 print(f"MOB RUSH @ WAVE {text.wave_count}")
+
+def wave_prot():
+    if text.wave_count > 1200:
+        print("-----------------------")
+        print("DANGER WAVE PROT CAUGHT")
+        print("-----------------------")
+        auto_prestige()
 
 
 time.sleep(3)
@@ -310,8 +316,15 @@ while True:
         func = fncqueue.get()
         func()
     
+    wave_prot()
+    #upgrade(1)
+    #upgrade(3)
+    #upgrade(4)
+    #upgrade(5)
+    upgrade(7)
     upgrade(8)
     #upgrade(10)
-    autocast(True)
     mob_rush()
+    autocast(True)
+    #mob_rush()
     time.sleep(2)

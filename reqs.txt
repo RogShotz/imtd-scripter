@@ -1,4 +1,5 @@
 pip install opencv-python
 pip install pytesseract
+pip install PyQt5
 
 tesseract-5.2.0
