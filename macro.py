@@ -17,6 +17,7 @@ pyautogui.PAUSE = pyauto_pause
 
 debug_mode = False
 dev_mode = False
+prestiege_mode = True
 
 # code related vars
 monster_position = []
@@ -79,11 +80,12 @@ def detector():
         defeat_found = pyautogui.locateOnScreen(
             'Defeat_Cut.png', confidence=0.8)
         
-        if(defeat_found):
-            fncqueue.put(auto_prestige)
+        if prestiege_mode:
+            if(defeat_found):
+                fncqueue.put(auto_prestige)
         
         im = pyautogui.screenshot(region=(1850, 900, 100, 100))
-        new_indicator = pyautogui.locate("new_indicator.png", im, confidence=0.4)
+        new_indicator = pyautogui.locate("new_indicator.png", im, confidence=0.6)
 
         if(new_indicator):
             print("ad detection")
@@ -130,6 +132,29 @@ def auto_prestige():  # running on seperate thread
             time.sleep(10)
             loadout()
             boss_rush()
+            #temp upgrade buyer
+            upgrades_button_location = pyautogui.locateOnScreen(
+            'upgrades_button.png', confidence=0.8)
+            print("Upgrade Start")
+            if upgrades_button_location:
+                upgrade_dollar_button_location = pyautogui.locateOnScreen(
+                'upgrade_dollar_button.png', confidence=0.8)
+                click_obf(upgrades_button_location)
+                print("upgrade Press")
+                if upgrade_dollar_button_location:
+                    for i in pyautogui.locateAllOnScreen('looksLikeThis.png'):
+                        center_button = pyautogui.center(i)
+                        click_obf_xy(center_button[0], center_button[1])
+                        print("dollar press")
+                    time.sleep(.5)
+                    pyautogui.press('esc')
+                    time.sleep(.5)
+            exit_game_button_location = pyautogui.locateOnScreen(
+                'exit_game_button.png', confidence=0.8)
+
+            if exit_game_button_location:
+                pyautogui.press('esc')
+
             play(True)
         else:
             print("ERR: prestige_nested_button was not")
@@ -187,34 +212,59 @@ def upgrade(pos: int):
 
         pyautogui.press('esc')
     '''
+
+    #prestige map
     #1st pos
     if pos == 1 or pos ==  0:
         click_obf_xy(879, 185)
         
     #3rd pos
-    if pos == 3 or pos == 0:
-        click_obf_xy(878, 300)
+    #if pos == 3 or pos == 0:
+        #click_obf_xy(878, 300)
 
     if pos == 4 or pos == 0:
         click_obf_xy(880, 350)
     
-    if pos == 5 or pos == 0:
-        click_obf_xy(1040, 355)
+    #if pos == 5 or pos == 0:
+        #click_obf_xy(1040, 355)
 
     if pos == 6 or pos == 0:
         click_obf_xy(880, 470)
 
+    #if pos == 7 or pos == 0:
+        #click_obf_xy(1040, 470)
+
+    #if pos == 8 or pos == 0:
+        #click_obf_xy(1040, 520)
+
+    #if pos == 10 or pos == 0:
+        #click_obf_xy(1040, 635)
+
+    #desert map
+    if pos == 2 or pos == 0:
+        click_obf_xy(1040, 295)
+
+    if pos == 3 or pos == 0:
+        click_obf_xy(880, 390)
+
+    if pos == 5 or pos == 0:
+        click_obf_xy(880, 495)
+
     if pos == 7 or pos == 0:
-        click_obf_xy(1040, 470)
+        click_obf_xy(880, 590)
 
     if pos == 8 or pos == 0:
-        click_obf_xy(1040, 520)
+        click_obf_xy(1040, 590)
+
+    if pos == 9 or pos == 0:
+        click_obf_xy(880, 690)
 
     if pos == 10 or pos == 0:
-        click_obf_xy(1040, 635)
+        click_obf_xy(1040, 690)
 
     time.sleep(.2)
-    upgrade_button_pixel = pyautogui.pixelMatchesColor(1170, 942, (143, 204, 84))
+    upgrade_button_pixel = pyautogui.locateOnScreen(
+        'upgrade_button.png', confidence=0.8)
     if upgrade_button_pixel:
         click_obf_xy(1170, 942)
         time.sleep(.15)
@@ -238,36 +288,39 @@ def check_ad():
 
 
 def autocast(restrict_boss: bool):
-    riches_spell_location = pyautogui.locateOnScreen(
-        'riches_spell.png', confidence=0.8)
     power_spell_location = pyautogui.locateOnScreen(
         'power_spell.png', confidence=0.8)
-    mastership_spell_location = pyautogui.locateOnScreen(
-        'mastership_spell.png', confidence=0.8)
+
+    if power_spell_location:
+        click_obf(power_spell_location)
+
     time_spell_location = pyautogui.locateOnScreen(
         'time_spell.png', confidence=0.8)
 
+    if time_spell_location:
+        click_obf(time_spell_location)
+    '''
+    riches_spell_location = pyautogui.locateOnScreen(
+        'riches_spell.png', confidence=0.8)
+
     if riches_spell_location:
         if restrict_boss:
-            if text.wave_count % 5 == 0:
+            if text.wave_count % 5 == 0 or text.wave_count < 1000:
                 click_obf(riches_spell_location)
                 #print("Boss Spell Casted")
         else:
             click_obf(riches_spell_location)
 
-    if power_spell_location:
-        click_obf(power_spell_location)
-
+    mastership_spell_location = pyautogui.locateOnScreen(
+        'mastership_spell.png', confidence=0.8)
+    
     if mastership_spell_location:
         if restrict_boss:
-            if text.wave_count % 5 == 0:
+            if text.wave_count % 5 == 0 or text.wave_count < 1000:
                 click_obf(mastership_spell_location)
-                #print("Boss Spell Casted")
         else:
             click_obf(riches_spell_location)
-
-    if time_spell_location:
-        click_obf(time_spell_location)
+    '''
 
 
 def boss_rush():
@@ -284,21 +337,22 @@ def boss_rush():
 
 
 def mob_rush():
-    if text.wave_count < 300 and text.wave_count > 0:
+    if text.wave_count < 2000 and text.wave_count > 0:
         mob_button_location = pyautogui.locateOnScreen(
-            'mob_button.png', confidence=0.8)
+            'mob_button.png', confidence=0.7)
         if mob_button_location:
             click_obf(mob_button_location)
             mob_begin_button_location = pyautogui.locateOnScreen(
-                'mob_begin_button.png', confidence=0.8)
+                'mob_begin_button.png', confidence=0.7)
             if mob_begin_button_location:
                 click_obf(mob_begin_button_location)
                 print(f"MOB RUSH @ WAVE {text.wave_count}")
+    time.sleep(20)
 
 def wave_prot():
-    if text.wave_count > 1200:
+    if text.wave_count > 1400:
         print("-----------------------")
-        print("DANGER WAVE PROT CAUGHT")
+        print(f"DANGER WAVE PROT CAUGHT @ {text.wave_count}")
         print("-----------------------")
         auto_prestige()
 
@@ -307,6 +361,7 @@ time.sleep(3)
 
 # trap in dev mode if wanted
 while dev_mode:
+    time.sleep(1)
     print(pyautogui.position())
 
 macro_init()
@@ -316,15 +371,9 @@ while True:
         func = fncqueue.get()
         func()
     
-    wave_prot()
-    #upgrade(1)
-    #upgrade(3)
-    #upgrade(4)
+    #wave_prot()
     #upgrade(5)
     upgrade(7)
-    upgrade(8)
-    #upgrade(10)
     mob_rush()
-    autocast(True)
-    #mob_rush()
-    time.sleep(2)
+    #autocast(True)
+    time.sleep(4)

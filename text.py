@@ -1,4 +1,6 @@
 # Import required packages
+from copy import error
+from msilib.schema import Error
 import cv2
 import pytesseract
 import pyautogui
@@ -65,12 +67,13 @@ def find_wave():  # meant to run in a thread that updates every 5 seconds
                 wave = int(text[start+5:end])
                 if wave > wave_count:  # if it got actual input
                     if my_logging.log_get("prestiges"):
-                        wave_count = int(wave)
+                        if wave - wave_count < 2000: 
+                            wave_count = int(wave)
+                        else:
+                            wave_count += 5
             except:
                 pass
             time.sleep(5)
 
         wave_count = -1
     return
-
-#test()
