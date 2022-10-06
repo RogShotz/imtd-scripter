@@ -45,6 +45,25 @@ def click_obf_xy(x: int, y: int):
     pyautogui.click(x+x_offset, y+y_offset)
     log.log_add("clicks")
 
+# returns one position for each element given a threshold amount to differ positions by
+def locate_all_thresholder(image, threshhold: int):
+    positions = []
+    locate_all = pyautogui .locateAllOnScreen( image, confidence=0.9, grayscale=False )
+    locate_all = list(locate_all)
+    positions.append(list(locate_all)[0])
+
+    for p in locate_all:
+        for pos in positions:
+            if abs(pos[0]-p[0] ) > threshhold and abs(pos[1] -p[1]) > threshhold:
+                positions.append(p)
+    return positions
+
+def exit_check():
+    exit_game_button_location = pyautogui.locateOnScreen(
+        'exit_game_button.png', confidence=0.8)
+    if exit_game_button_location:
+        pyautogui.press('esc')
+
 
 # INIT AREA
 
@@ -133,28 +152,7 @@ def auto_prestige():  # running on seperate thread
             loadout()
             boss_rush()
             #temp upgrade buyer
-            upgrades_button_location = pyautogui.locateOnScreen(
-            'upgrades_button.png', confidence=0.8)
-            print("Upgrade Start")
-            if upgrades_button_location:
-                upgrade_dollar_button_location = pyautogui.locateOnScreen(
-                'upgrade_dollar_button.png', confidence=0.8)
-                click_obf(upgrades_button_location)
-                print("upgrade Press")
-                if upgrade_dollar_button_location:
-                    for i in pyautogui.locateAllOnScreen('looksLikeThis.png'):
-                        center_button = pyautogui.center(i)
-                        click_obf_xy(center_button[0], center_button[1])
-                        print("dollar press")
-                    time.sleep(.5)
-                    pyautogui.press('esc')
-                    time.sleep(.5)
-            exit_game_button_location = pyautogui.locateOnScreen(
-                'exit_game_button.png', confidence=0.8)
-
-            if exit_game_button_location:
-                pyautogui.press('esc')
-
+            temp_upgrade()
             play(True)
         else:
             print("ERR: prestige_nested_button was not")
@@ -273,11 +271,7 @@ def upgrade(pos: int):
 
     time.sleep(.1)
 
-    exit_game_button_location = pyautogui.locateOnScreen(
-        'exit_game_button.png', confidence=0.8)
-
-    if exit_game_button_location:
-        pyautogui.press('esc')
+    exit_check()
     
 
 def check_ad():
@@ -347,7 +341,7 @@ def mob_rush():
             if mob_begin_button_location:
                 click_obf(mob_begin_button_location)
                 print(f"MOB RUSH @ WAVE {text.wave_count}")
-    time.sleep(20)
+                time.sleep(20)
 
 def wave_prot():
     if text.wave_count > 1400:
@@ -356,8 +350,26 @@ def wave_prot():
         print("-----------------------")
         auto_prestige()
 
+def temp_upgrade():
+    upgrades_button_location = pyautogui.locateOnScreen(
+        'upgrades_button.png', confidence=0.8)
+    print("Upgrade Start")
+    if upgrades_button_location:
+        click_obf(upgrades_button_location)
+        upgrade_dollar_button_locations = locate_all_thresholder('upgrade_dollar_button.png', 8)
+        print(upgrade_dollar_button_locations)
+        print("upgrade Press")
+        if upgrade_dollar_button_locations:
+            for i in upgrade_dollar_button_locations:
+                center_button = pyautogui.center(i)
+                click_obf_xy(center_button[0], center_button[1])
+                print("dollar press")
+            time.sleep(.2)
+        pyautogui.press('esc')
+    time.sleep(.1)
+    exit_check()
 
-time.sleep(3)
+time.sleep(3) # gap for before we start
 
 # trap in dev mode if wanted
 while dev_mode:
@@ -376,4 +388,4 @@ while True:
     upgrade(7)
     mob_rush()
     #autocast(True)
-    time.sleep(4)
+    time.sleep(3)
