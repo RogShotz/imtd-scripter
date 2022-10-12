@@ -22,6 +22,7 @@ prestiege_mode = True
 # code related vars
 monster_position = []
 fncqueue = Queue(maxsize = 0)
+PATH = "screen_cap/"
 
 
 # INTERNAL FNC AREA
@@ -59,7 +60,7 @@ def locate_all_thresholder(image, threshhold: int):
     return positions
 
 def exit_check():
-    exit_game_button_location = pyautogui.locateOnScreen(
+    exit_game_button_location = pyautogui.locateOnScreen(PATH + 
         'exit_game_button.png', confidence=0.8)
     if exit_game_button_location:
         pyautogui.press('esc')
@@ -96,7 +97,7 @@ def map_pos_init():  # TODO: Proof this
 def detector():
     while True:
         global fncqueue
-        defeat_found = pyautogui.locateOnScreen(
+        defeat_found = pyautogui.locateOnScreen(PATH + 
             'Defeat_Cut.png', confidence=0.8)
         
         if prestiege_mode:
@@ -118,17 +119,17 @@ def detector():
 # GAME MACRO AREA
 
 def auto_prestige():  # running on seperate thread
-    prestige_location = pyautogui.locateOnScreen(
+    prestige_location = pyautogui.locateOnScreen(PATH + 
         'prestige_cut.png', confidence=0.8)
         
     if prestige_location:
         click_obf(prestige_location)
-        prestige_nested_button = pyautogui.locateOnScreen(
+        prestige_nested_button = pyautogui.locateOnScreen(PATH + 
             'prestige_button.png', confidence=0.8)
         if not prestige_nested_button:
             print("Defeat Detected, but no Prestige Nested Button")
             print("Attempting to scroll prestige menu")
-            nested_map_selection_button_location = pyautogui.locateOnScreen(
+            nested_map_selection_button_location = pyautogui.locateOnScreen(PATH + 
                 'nested_map_selection_button.png', confidence=0.8)
             if nested_map_selection_button_location:
                 # click ensures were in the menu
@@ -141,7 +142,7 @@ def auto_prestige():  # running on seperate thread
             else:
                 print(
                     "ERR: nested_map_selection_button_location was not found")
-        prestige_nested_button = pyautogui.locateOnScreen(
+        prestige_nested_button = pyautogui.locateOnScreen(PATH + 
             'prestige_button.png', confidence=0.8)
         if prestige_nested_button:
             click_obf(prestige_nested_button)
@@ -162,8 +163,8 @@ def auto_prestige():  # running on seperate thread
 
 
 def play(play: bool):
-    play_location = pyautogui.locateOnScreen('play_button.png', confidence=0.8)
-    pause_location = pyautogui.locateOnScreen(
+    play_location = pyautogui.locateOnScreen(PATH + 'play_button.png', confidence=0.7)
+    pause_location = pyautogui.locateOnScreen(PATH + 
         'pause_button.png', confidence=0.8)
 
     if play_location:  # if the play button exists
@@ -177,12 +178,12 @@ def play(play: bool):
 
 
 def loadout():
-    loadout_button_location = pyautogui.locateOnScreen(
+    loadout_button_location = pyautogui.locateOnScreen(PATH + 
         'loadout_button.png', confidence=0.8)
 
     if loadout_button_location:
             click_obf(loadout_button_location)
-            load_loadout_button_location = pyautogui.locateOnScreen(
+            load_loadout_button_location = pyautogui.locateOnScreen(PATH + 
                 'load_loadout_button.png', confidence=0.6)
             if load_loadout_button_location:  # limited to first instace i.e. Towers1
                 click_obf(load_loadout_button_location)
@@ -261,7 +262,7 @@ def upgrade(pos: int):
         click_obf_xy(1040, 690)
 
     time.sleep(.2)
-    upgrade_button_pixel = pyautogui.locateOnScreen(
+    upgrade_button_pixel = pyautogui.locateOnScreen(PATH + 
         'upgrade_button.png', confidence=0.8)
     if upgrade_button_pixel:
         click_obf_xy(1170, 942)
@@ -282,19 +283,19 @@ def check_ad():
 
 
 def autocast(restrict_boss: bool):
-    power_spell_location = pyautogui.locateOnScreen(
+    power_spell_location = pyautogui.locateOnScreen(PATH + 
         'power_spell.png', confidence=0.8)
 
     if power_spell_location:
         click_obf(power_spell_location)
 
-    time_spell_location = pyautogui.locateOnScreen(
+    time_spell_location = pyautogui.locateOnScreen(PATH + 
         'time_spell.png', confidence=0.8)
 
     if time_spell_location:
         click_obf(time_spell_location)
     '''
-    riches_spell_location = pyautogui.locateOnScreen(
+    riches_spell_location = pyautogui.locateOnScreen(PATH + 
         'riches_spell.png', confidence=0.8)
 
     if riches_spell_location:
@@ -305,7 +306,7 @@ def autocast(restrict_boss: bool):
         else:
             click_obf(riches_spell_location)
 
-    mastership_spell_location = pyautogui.locateOnScreen(
+    mastership_spell_location = pyautogui.locateOnScreen(PATH + 
         'mastership_spell.png', confidence=0.8)
     
     if mastership_spell_location:
@@ -318,7 +319,7 @@ def autocast(restrict_boss: bool):
 
 
 def boss_rush():
-    boss_rush_button_location = pyautogui.locateOnScreen(
+    boss_rush_button_location = pyautogui.locateOnScreen(PATH + 
         'boss_rush_button.png', confidence=0.9)
 
     if boss_rush_button_location:
@@ -332,16 +333,16 @@ def boss_rush():
 
 def mob_rush():
     if text.wave_count < 2000 and text.wave_count > 0:
-        mob_button_location = pyautogui.locateOnScreen(
+        mob_button_location = pyautogui.locateOnScreen(PATH + 
             'mob_button.png', confidence=0.7)
         if mob_button_location:
             click_obf(mob_button_location)
-            mob_begin_button_location = pyautogui.locateOnScreen(
+            mob_begin_button_location = pyautogui.locateOnScreen(PATH + 
                 'mob_begin_button.png', confidence=0.7)
             if mob_begin_button_location:
                 click_obf(mob_begin_button_location)
                 print(f"MOB RUSH @ WAVE {text.wave_count}")
-                time.sleep(20)
+                time.sleep(25)
 
 def wave_prot():
     if text.wave_count > 1400:
@@ -351,21 +352,24 @@ def wave_prot():
         auto_prestige()
 
 def temp_upgrade():
-    upgrades_button_location = pyautogui.locateOnScreen(
-        'upgrades_button.png', confidence=0.8)
-    print("Upgrade Start")
-    if upgrades_button_location:
-        click_obf(upgrades_button_location)
-        upgrade_dollar_button_locations = locate_all_thresholder('upgrade_dollar_button.png', 8)
-        print(upgrade_dollar_button_locations)
-        print("upgrade Press")
-        if upgrade_dollar_button_locations:
-            for i in upgrade_dollar_button_locations:
-                center_button = pyautogui.center(i)
-                click_obf_xy(center_button[0], center_button[1])
-                print("dollar press")
-            time.sleep(.2)
-        pyautogui.press('esc')
+    try:
+        upgrades_button_location = pyautogui.locateOnScreen(PATH + 
+            'upgrades_button.png', confidence=0.8)
+        print("Upgrade Start")
+        if upgrades_button_location:
+            click_obf(upgrades_button_location)
+            upgrade_dollar_button_locations = locate_all_thresholder('upgrade_dollar_button.png', 5)
+            print(upgrade_dollar_button_locations)
+            print("upgrade Press")
+            if upgrade_dollar_button_locations:
+                for i in upgrade_dollar_button_locations:
+                    center_button = pyautogui.center(i)
+                    click_obf_xy(center_button[0], center_button[1])
+                    print("dollar press")
+                time.sleep(.2)
+            pyautogui.press('esc')
+    except:
+        print("Temp Upgrades not found :(")
     time.sleep(.1)
     exit_check()
 
