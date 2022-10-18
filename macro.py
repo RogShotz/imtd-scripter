@@ -105,7 +105,7 @@ def detector():
                 fncqueue.put(auto_prestige)
         
         im = pyautogui.screenshot(region=(1850, 900, 100, 100))
-        new_indicator = pyautogui.locate("new_indicator.png", im, confidence=0.6)
+        new_indicator = pyautogui.locate(PATH + "new_indicator.png", im, confidence=0.6)
 
         if(new_indicator):
             print("ad detection")
@@ -326,7 +326,7 @@ def boss_rush():
         click_obf(boss_rush_button_location)
         print("Boss Rush Enabled")
         # Point
-        mini_boss_rush_button_location = pyautogui.locateCenterOnScreen('mini_boss_rush_button.png', confidence=0.8)
+        mini_boss_rush_button_location = pyautogui.locateCenterOnScreen(PATH+'mini_boss_rush_button.png', confidence=0.8)
         if mini_boss_rush_button_location:
             click_obf_xy(mini_boss_rush_button_location.x+140, mini_boss_rush_button_location.y)
 
@@ -334,7 +334,7 @@ def boss_rush():
 def mob_rush():
     if text.wave_count < 2000 and text.wave_count > 0:
         mob_button_location = pyautogui.locateOnScreen(PATH + 
-            'mob_button.png', confidence=0.7)
+            'mob_button.png', confidence=0.8)
         if mob_button_location:
             click_obf(mob_button_location)
             mob_begin_button_location = pyautogui.locateOnScreen(PATH + 
@@ -358,7 +358,7 @@ def temp_upgrade():
         print("Upgrade Start")
         if upgrades_button_location:
             click_obf(upgrades_button_location)
-            upgrade_dollar_button_locations = locate_all_thresholder('upgrade_dollar_button.png', 5)
+            upgrade_dollar_button_locations = locate_all_thresholder(PATH + 'upgrade_dollar_button.png', 5)
             print(upgrade_dollar_button_locations)
             print("upgrade Press")
             if upgrade_dollar_button_locations:
@@ -367,9 +367,10 @@ def temp_upgrade():
                     click_obf_xy(center_button[0], center_button[1])
                     print("dollar press")
                 time.sleep(.2)
-            pyautogui.press('esc')
     except:
         print("Temp Upgrades not found :(")
+    time.sleep(.1)
+    pyautogui.press('esc')
     time.sleep(.1)
     exit_check()
 
@@ -389,7 +390,7 @@ while True:
     
     #wave_prot()
     #upgrade(5)
-    upgrade(7)
+    upgrade(10)
     mob_rush()
     #autocast(True)
     time.sleep(3)
