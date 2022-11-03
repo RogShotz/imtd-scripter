@@ -153,7 +153,7 @@ def auto_prestige():  # running on seperate thread
             loadout()
             boss_rush()
             #temp upgrade buyer
-            temp_upgrade()
+            temp_upgrade(2)
             play(True)
         else:
             print("ERR: prestige_nested_button was not")
@@ -221,8 +221,8 @@ def upgrade(pos: int):
     #if pos == 3 or pos == 0:
         #click_obf_xy(878, 300)
 
-    if pos == 4 or pos == 0:
-        click_obf_xy(880, 350)
+    #if pos == 4 or pos == 0:
+        #click_obf_xy(880, 350)
     
     #if pos == 5 or pos == 0:
         #click_obf_xy(1040, 355)
@@ -245,6 +245,9 @@ def upgrade(pos: int):
 
     if pos == 3 or pos == 0:
         click_obf_xy(880, 390)
+
+    if pos == 4 or pos == 0:
+        click_obf_xy(1040, 390)
 
     if pos == 5 or pos == 0:
         click_obf_xy(880, 495)
@@ -342,7 +345,7 @@ def mob_rush():
             if mob_begin_button_location:
                 click_obf(mob_begin_button_location)
                 print(f"MOB RUSH @ WAVE {text.wave_count}")
-                time.sleep(25)
+                time.sleep(30)
 
 def wave_prot():
     if text.wave_count > 1400:
@@ -351,7 +354,7 @@ def wave_prot():
         print("-----------------------")
         auto_prestige()
 
-def temp_upgrade():
+def temp_upgrade(amount: int):
     try:
         upgrades_button_location = pyautogui.locateOnScreen(PATH + 
             'upgrades_button.png', confidence=0.8)
@@ -362,10 +365,11 @@ def temp_upgrade():
             print(upgrade_dollar_button_locations)
             print("upgrade Press")
             if upgrade_dollar_button_locations:
-                for i in upgrade_dollar_button_locations:
-                    center_button = pyautogui.center(i)
-                    click_obf_xy(center_button[0], center_button[1])
-                    print("dollar press")
+                for upgrade_dollar_button_location in upgrade_dollar_button_locations:
+                    center_button = pyautogui.center(upgrade_dollar_button_location)
+                    for i in range(0, amount):
+                        click_obf_xy(center_button[0], center_button[1])
+                        print("dollar press")
                 time.sleep(.2)
     except:
         print("Temp Upgrades not found :(")
@@ -390,7 +394,7 @@ while True:
     
     #wave_prot()
     #upgrade(5)
-    upgrade(10)
+    upgrade(8)
     mob_rush()
     #autocast(True)
     time.sleep(3)
