@@ -265,15 +265,14 @@ def upgrade(pos: int):
         click_obf_xy(1040, 690)
 
     time.sleep(.2)
-    upgrade_button_pixel = pyautogui.locateOnScreen(PATH + 
-        'upgrade_button.png', confidence=0.8)
-    if upgrade_button_pixel:
-        click_obf_xy(1170, 942)
-        time.sleep(.15)
+    upgrade_button_location = pyautogui.locateOnScreen(PATH + 
+        'upgrade_button.png', confidence=0.99, grayscale=False)
+    if upgrade_button_location:
+        click_obf(upgrade_button_location)
     
-    pyautogui.press('esc')
+    time.sleep(.15)
 
-    time.sleep(.1)
+    pyautogui.press('esc')
 
     exit_check()
     
@@ -335,17 +334,20 @@ def boss_rush():
 
 
 def mob_rush():
-    if text.wave_count < 2000 and text.wave_count > 0:
-        mob_button_location = pyautogui.locateOnScreen(PATH + 
+    #if text.wave_count < 2000 and text.wave_count > 0:
+    mob_button_location = pyautogui.locateOnScreen(PATH + 
             'mob_button.png', confidence=0.8)
-        if mob_button_location:
-            click_obf(mob_button_location)
-            mob_begin_button_location = pyautogui.locateOnScreen(PATH + 
-                'mob_begin_button.png', confidence=0.7)
-            if mob_begin_button_location:
-                click_obf(mob_begin_button_location)
-                print(f"MOB RUSH @ WAVE {text.wave_count}")
-                time.sleep(30)
+    if mob_button_location:
+        click_obf(mob_button_location)
+        mob_begin_button_location = pyautogui.locateOnScreen(PATH + 
+            'mob_begin_button.png', confidence=0.7)
+        if mob_begin_button_location:
+            click_obf(mob_begin_button_location)
+            print(f"MOB RUSH @ WAVE {text.wave_count}")
+            time.sleep(30)
+            pyautogui.press('esc')
+            time.sleep(.1)
+            exit_check()
 
 def wave_prot():
     if text.wave_count > 1400:
@@ -358,18 +360,19 @@ def temp_upgrade(amount: int):
     try:
         upgrades_button_location = pyautogui.locateOnScreen(PATH + 
             'upgrades_button.png', confidence=0.8)
-        print("Upgrade Start")
+        print("Temp Upgrade Start")
         if upgrades_button_location:
             click_obf(upgrades_button_location)
-            upgrade_dollar_button_locations = locate_all_thresholder(PATH + 'upgrade_dollar_button.png', 5)
+            upgrade_dollar_button_locations = locate_all_thresholder(PATH + 'upgrade_dollar_button.png', 10)
             print(upgrade_dollar_button_locations)
-            print("upgrade Press")
             if upgrade_dollar_button_locations:
+                print("Temp Upgrading")
                 for upgrade_dollar_button_location in upgrade_dollar_button_locations:
                     center_button = pyautogui.center(upgrade_dollar_button_location)
                     for i in range(0, amount):
+                        print("click: ", i)
                         click_obf_xy(center_button[0], center_button[1])
-                        print("dollar press")
+
                 time.sleep(.2)
     except:
         print("Temp Upgrades not found :(")
@@ -394,7 +397,7 @@ while True:
     
     #wave_prot()
     #upgrade(5)
-    upgrade(8)
+    upgrade(7)
     mob_rush()
     #autocast(True)
     time.sleep(3)
